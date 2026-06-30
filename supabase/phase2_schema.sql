@@ -68,20 +68,20 @@ CREATE TABLE IF NOT EXISTS timeline_events (
 -- RLS for timeline_events
 ALTER TABLE timeline_events ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "timeline_events_user_select"
-  ON timeline_events FOR SELECT
+DROP POLICY IF EXISTS "timeline_events_user_select" ON timeline_events;
+CREATE POLICY "timeline_events_user_select" ON timeline_events FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "timeline_events_user_insert"
-  ON timeline_events FOR INSERT
+DROP POLICY IF EXISTS "timeline_events_user_insert" ON timeline_events;
+CREATE POLICY "timeline_events_user_insert" ON timeline_events FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "timeline_events_user_update"
-  ON timeline_events FOR UPDATE
+DROP POLICY IF EXISTS "timeline_events_user_update" ON timeline_events;
+CREATE POLICY "timeline_events_user_update" ON timeline_events FOR UPDATE
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "timeline_events_user_delete"
-  ON timeline_events FOR DELETE
+DROP POLICY IF EXISTS "timeline_events_user_delete" ON timeline_events;
+CREATE POLICY "timeline_events_user_delete" ON timeline_events FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Index on user_id + event_date for timeline queries
@@ -104,12 +104,12 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 
 ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "activity_logs_user_select"
-  ON activity_logs FOR SELECT
+DROP POLICY IF EXISTS "activity_logs_user_select" ON activity_logs;
+CREATE POLICY "activity_logs_user_select" ON activity_logs FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "activity_logs_user_insert"
-  ON activity_logs FOR INSERT
+DROP POLICY IF EXISTS "activity_logs_user_insert" ON activity_logs;
+CREATE POLICY "activity_logs_user_insert" ON activity_logs FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Index for user activity queries
@@ -122,20 +122,20 @@ CREATE INDEX IF NOT EXISTS idx_activity_logs_user
 
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "skills_user_select"
-  ON skills FOR SELECT
+DROP POLICY IF EXISTS "skills_user_select" ON skills;
+CREATE POLICY "skills_user_select" ON skills FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "skills_user_insert"
-  ON skills FOR INSERT
+DROP POLICY IF EXISTS "skills_user_insert" ON skills;
+CREATE POLICY "skills_user_insert" ON skills FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "skills_user_update"
-  ON skills FOR UPDATE
+DROP POLICY IF EXISTS "skills_user_update" ON skills;
+CREATE POLICY "skills_user_update" ON skills FOR UPDATE
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "skills_user_delete"
-  ON skills FOR DELETE
+DROP POLICY IF EXISTS "skills_user_delete" ON skills;
+CREATE POLICY "skills_user_delete" ON skills FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Unique constraint to prevent skill duplicates per user
@@ -148,16 +148,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_skills_user_name
 
 ALTER TABLE ai_jobs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "ai_jobs_user_select"
-  ON ai_jobs FOR SELECT
+DROP POLICY IF EXISTS "ai_jobs_user_select" ON ai_jobs;
+CREATE POLICY "ai_jobs_user_select" ON ai_jobs FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "ai_jobs_user_insert"
-  ON ai_jobs FOR INSERT
+DROP POLICY IF EXISTS "ai_jobs_user_insert" ON ai_jobs;
+CREATE POLICY "ai_jobs_user_insert" ON ai_jobs FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "ai_jobs_user_update"
-  ON ai_jobs FOR UPDATE
+DROP POLICY IF EXISTS "ai_jobs_user_update" ON ai_jobs;
+CREATE POLICY "ai_jobs_user_update" ON ai_jobs FOR UPDATE
   USING (auth.uid() = user_id);
 
 -- ─────────────────────────────────────────────────────────────
@@ -188,7 +188,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER IF NOT EXISTS trigger_timeline_events_updated_at
+DROP TRIGGER IF EXISTS trigger_timeline_events_updated_at ON timeline_events;
+CREATE TRIGGER trigger_timeline_events_updated_at
   BEFORE UPDATE ON timeline_events
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
@@ -224,3 +225,4 @@ CREATE INDEX IF NOT EXISTS idx_documents_user_created
 
 CREATE INDEX IF NOT EXISTS idx_ai_jobs_user_status
   ON ai_jobs (user_id, status);
+
