@@ -21,6 +21,7 @@ const AuthCallbackPage = lazy(() => import('@/features/authentication/AuthCallba
 
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const UploadPage = lazy(() => import('@/features/upload/UploadPage'))
+const ProcessingDashboard = lazy(() => import('@/features/upload/ProcessingDashboard'))
 const MemoriesPage = lazy(() => import('@/features/memories/MemoriesPage'))
 const TimelinePage = lazy(() => import('@/features/timeline/TimelinePage'))
 const KnowledgeGraphPage = lazy(() => import('@/features/knowledge-graph/KnowledgeGraphPage'))
@@ -121,6 +122,16 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         <Suspense fallback={<PageLoader />}>
           <UploadPage />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/processing',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<PageLoader />}>
+          <ProcessingDashboard />
         </Suspense>
       </ProtectedRoute>
     ),

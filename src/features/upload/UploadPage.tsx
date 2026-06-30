@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Upload, FileText, Image, File, X, CheckCircle2,
-  AlertCircle, CloudUpload, Info
+  AlertCircle, CloudUpload, Info, Zap, Brain, Cpu, Tag
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/AppShell'
 import { Button, Card, CardContent, Progress, Badge } from '@/components/ui'
@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/providers/AuthProvider'
 import { STORAGE_BUCKETS } from '@/constants/app'
 import { v4 as uuidv4 } from 'uuid'
+import { runAIPipeline, createProcessingJob, type PipelineProgress, type PipelineStep } from '@/lib/ai-pipeline'
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -20,8 +21,9 @@ import { v4 as uuidv4 } from 'uuid'
 interface UploadFile {
   id: string
   file: File
-  status: 'pending' | 'uploading' | 'success' | 'error'
-  progress: number
+  status: 'pending' | 'uploading' | 'processing' | 'success' | 'error'
+  uploadProgress: number
+  aiProgress: PipelineProgress | null
   error?: string
   documentId?: string
 }
@@ -30,6 +32,7 @@ interface UploadFile {
 // File type icon
 // ─────────────────────────────────────────────────────────────
 
+
 function FileTypeIcon({ mimeType, className }: { mimeType: string; className?: string }) {
   if (mimeType.startsWith('image/')) return <Image className={className} />
   if (mimeType === 'application/pdf') return <FileText className={className} />
@@ -37,11 +40,65 @@ function FileTypeIcon({ mimeType, className }: { mimeType: string; className?: s
 }
 
 // ─────────────────────────────────────────────────────────────
+// AI Progress Display
+// ─────────────────────────────────────────────────────────────
+
+function AIProgressBar({ progress }: { progress: PipelineProgress }) {
+  const stepIcons: Partial<Record<PipelineStep, React.ReactNode>> = {
+    extracting_text: <FileText className="w-3 h-3" />,
+    analyzing: <Brain className="w-3 h-3" />,
+    classifying: <Cpu className="w-3 h-3" />,
+    extracting_entities: <Zap className="w-3 h-3" />,
+    generating_tags: <Tag className="w-3 h-3" />,
+  }
+
+  const isComplete = progress.step === 'completed'
+  const isFailed = progress.step === 'failed'
+
+  return (
+    <div className="space-y-1.5 mt-2">
+      <div className="flex items-center gap-1.5">
+        {stepIcons[progress.step] && (
+          <span className={cn(
+            'transition-colors',
+            isComplete ? 'text-emerald-500' : isFailed ? 'text-red-500' : 'text-violet-500'
+          )}>
+            {stepIcons[progress.step]}
+          </span>
+        )}
+        <p className={cn(
+          'text-xs transition-colors',
+          isComplete ? 'text-emerald-500' : isFailed ? 'text-red-500' : 'text-violet-400'
+        )}>
+          {progress.message}
+        </p>
+      </div>
+      {!isComplete && !isFailed && (
+        <div className="relative h-1 bg-muted rounded-full overflow-hidden">
+          <motion.div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full"
+            initial={{ width: '0%' }}
+            animate={{ width: `${progress.percent}%` }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
 // Upload file card
 // ─────────────────────────────────────────────────────────────
 
 function UploadFileCard({ uploadFile, onRemove }: { uploadFile: UploadFile; onRemove: () => void }) {
-  const { file, status, progress, error } = uploadFile
+  const { file, status, uploadProgress, aiProgress, error } = uploadFile
+
+  const isComplete = status === 'success'
+  const isFailed = status === 'error'
+  const isProcessing = status === 'processing'
+  const isUploading = status === 'uploading'
 
   return (
     <motion.div
@@ -49,19 +106,33 @@ function UploadFileCard({ uploadFile, onRemove }: { uploadFile: UploadFile; onRe
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -10 }}
       transition={{ duration: 0.2 }}
-      className="flex items-center gap-4 p-4 rounded-xl border bg-card"
+      className={cn(
+        'flex items-start gap-4 p-4 rounded-xl border transition-colors',
+        isComplete ? 'bg-emerald-500/5 border-emerald-500/20' :
+        isFailed ? 'bg-red-500/5 border-red-500/20' :
+        isProcessing ? 'bg-violet-500/5 border-violet-500/20' :
+        'bg-card'
+      )}
     >
       {/* Icon */}
       <div className={cn(
-        'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
-        status === 'success' ? 'bg-emerald-500/10' :
-        status === 'error' ? 'bg-destructive/10' :
+        'w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
+        isComplete ? 'bg-emerald-500/10' :
+        isFailed ? 'bg-destructive/10' :
+        isProcessing ? 'bg-violet-500/10' :
         'bg-violet-500/10'
       )}>
-        {status === 'success' ? (
+        {isComplete ? (
           <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-        ) : status === 'error' ? (
+        ) : isFailed ? (
           <AlertCircle className="w-5 h-5 text-destructive" />
+        ) : isProcessing ? (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          >
+            <Brain className="w-5 h-5 text-violet-500" />
+          </motion.div>
         ) : (
           <FileTypeIcon mimeType={file.type} className="w-5 h-5 text-violet-500" />
         )}
@@ -77,31 +148,66 @@ function UploadFileCard({ uploadFile, onRemove }: { uploadFile: UploadFile; onRe
         </div>
         <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
 
-        {/* Progress */}
-        {status === 'uploading' && (
-          <Progress value={progress} className="h-1" />
+        {/* Upload Progress */}
+        {isUploading && (
+          <div className="space-y-1">
+            <p className="text-xs text-blue-400">Uploading to cloud storage...</p>
+            <Progress value={uploadProgress} className="h-1" />
+          </div>
         )}
 
-        {status === 'error' && error && (
-          <p className="text-xs text-destructive">{error}</p>
+        {/* AI Processing Progress */}
+        {isProcessing && aiProgress && (
+          <AIProgressBar progress={aiProgress} />
         )}
 
-        {status === 'success' && (
-          <p className="text-xs text-emerald-500">Uploaded successfully — AI processing queued</p>
+        {isFailed && error && (
+          <p className="text-xs text-destructive mt-1">{error}</p>
+        )}
+
+        {isComplete && (
+          <p className="text-xs text-emerald-500">
+            ✨ Memory created — AI extraction complete
+          </p>
         )}
       </div>
 
       {/* Remove button */}
-      {status !== 'uploading' && (
+      {status !== 'uploading' && status !== 'processing' && (
         <button
           onClick={onRemove}
-          className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+          className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0"
           aria-label="Remove file"
         >
           <X className="w-4 h-4" />
         </button>
       )}
     </motion.div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+// Gemini API Key Check
+// ─────────────────────────────────────────────────────────────
+
+function ApiKeyMissing() {
+  const hasKey = !!import.meta.env.VITE_GEMINI_API_KEY
+
+  if (hasKey) return null
+
+  return (
+    <Card className="border-amber-500/30 bg-amber-500/5">
+      <CardContent className="p-4 flex items-start gap-3">
+        <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+        <div className="text-xs space-y-1">
+          <p className="font-medium text-amber-500">Gemini API Key Missing</p>
+          <p className="text-muted-foreground">
+            Add <code className="bg-muted px-1 py-0.5 rounded text-amber-400">VITE_GEMINI_API_KEY</code> to your <code className="bg-muted px-1 py-0.5 rounded">.env.local</code> file to enable AI processing.
+            Files will still be uploaded and stored safely.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -114,18 +220,15 @@ export default function UploadPage() {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: unknown[]) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadFile[] = acceptedFiles.map((file) => ({
       id: uuidv4(),
       file,
       status: 'pending',
-      progress: 0,
+      uploadProgress: 0,
+      aiProgress: null,
     }))
     setFiles((prev) => [...prev, ...newFiles])
-
-    if (rejectedFiles.length > 0) {
-      // TODO: show rejection toast
-    }
   }, [])
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
@@ -137,6 +240,10 @@ export default function UploadPage() {
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id))
+  }
+
+  const updateFile = (id: string, updates: Partial<UploadFile>) => {
+    setFiles((prev) => prev.map((f) => f.id === id ? { ...f, ...updates } : f))
   }
 
   const uploadAll = async () => {
@@ -151,12 +258,9 @@ export default function UploadPage() {
       const ext = uploadFile.file.name.split('.').pop()
       const storagePath = `${user.id}/${docId}/original.${ext}`
 
-      // Update status to uploading
-      setFiles((prev) =>
-        prev.map((f) => f.id === uploadFile.id ? { ...f, status: 'uploading', progress: 10 } : f)
-      )
+      // ── 1. Upload to Storage ──────────────────────────────
+      updateFile(uploadFile.id, { status: 'uploading', uploadProgress: 10 })
 
-      // Upload to Supabase Storage
       const { error: storageError } = await supabase.storage
         .from(STORAGE_BUCKETS.DOCUMENTS)
         .upload(storagePath, uploadFile.file, {
@@ -165,22 +269,16 @@ export default function UploadPage() {
         })
 
       if (storageError) {
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id
-              ? { ...f, status: 'error', error: storageError.message }
-              : f
-          )
-        )
+        updateFile(uploadFile.id, {
+          status: 'error',
+          error: storageError.message,
+        })
         continue
       }
 
-      // Progress update
-      setFiles((prev) =>
-        prev.map((f) => f.id === uploadFile.id ? { ...f, progress: 60 } : f)
-      )
+      updateFile(uploadFile.id, { uploadProgress: 60 })
 
-      // Save document metadata to database
+      // ── 2. Save document record ───────────────────────────
       const { error: dbError } = await supabase.from('documents').insert({
         id: docId,
         user_id: user.id,
@@ -195,25 +293,53 @@ export default function UploadPage() {
       })
 
       if (dbError) {
-        // Clean up the uploaded file
         await supabase.storage.from(STORAGE_BUCKETS.DOCUMENTS).remove([storagePath])
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === uploadFile.id
-              ? { ...f, status: 'error', error: dbError.message }
-              : f
-          )
-        )
+        updateFile(uploadFile.id, {
+          status: 'error',
+          error: dbError.message,
+        })
         continue
       }
 
-      // Success
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === uploadFile.id
-            ? { ...f, status: 'success', progress: 100, documentId: docId }
-            : f
-        )
+      updateFile(uploadFile.id, {
+        uploadProgress: 100,
+        documentId: docId,
+        status: 'processing',
+        aiProgress: {
+          step: 'queued',
+          percent: 0,
+          message: 'Queued for AI processing...',
+        },
+      })
+
+      // ── 3. Create AI Job record ───────────────────────────
+      const jobId = await createProcessingJob(docId, user.id)
+
+      if (!jobId) {
+        updateFile(uploadFile.id, {
+          status: 'error',
+          error: 'Could not create processing job',
+        })
+        continue
+      }
+
+      // ── 4. Run AI Pipeline (async, non-blocking) ──────────
+      runAIPipeline(
+        docId,
+        user.id,
+        uploadFile.file,
+        jobId,
+        (progress) => {
+          updateFile(uploadFile.id, { aiProgress: progress })
+          if (progress.step === 'completed') {
+            updateFile(uploadFile.id, { status: 'success' })
+          } else if (progress.step === 'failed') {
+            updateFile(uploadFile.id, {
+              status: 'error',
+              error: progress.error || 'AI processing failed',
+            })
+          }
+        }
       )
     }
 
@@ -222,6 +348,7 @@ export default function UploadPage() {
 
   const pendingCount = files.filter((f) => f.status === 'pending').length
   const successCount = files.filter((f) => f.status === 'success').length
+  const processingCount = files.filter((f) => f.status === 'processing').length
 
   return (
     <AppShell
@@ -234,9 +361,12 @@ export default function UploadPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Upload Memories</h1>
           <p className="text-muted-foreground text-sm">
-            Upload documents and MemoryVerse will extract knowledge, skills, and build your knowledge graph automatically.
+            Upload documents and MemoryVerse will extract knowledge, skills, and create intelligent Memory Objects automatically.
           </p>
         </div>
+
+        {/* API Key warning */}
+        <ApiKeyMissing />
 
         {/* Accepted formats info */}
         <Card className="border-dashed">
@@ -244,9 +374,9 @@ export default function UploadPage() {
             <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
             <div className="text-xs text-muted-foreground space-y-1">
               <p className="font-medium text-foreground">Supported formats</p>
-              <p>PDF, DOCX, DOC, TXT, Markdown, PNG, JPEG, PPTX, ZIP — up to 50MB each</p>
+              <p>PDF, DOCX, DOC, TXT, Markdown, PNG, JPEG, PPTX — up to 50MB each</p>
               <p className="text-violet-500">
-                ✨ After upload, AI will automatically extract skills, technologies, and timeline events
+                ✨ After upload, AI will automatically extract skills, technologies, timeline events, and create a rich Memory Object
               </p>
             </div>
           </CardContent>
@@ -310,9 +440,12 @@ export default function UploadPage() {
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-sm">
-                  {files.length} file{files.length !== 1 ? 's' : ''} selected
+                  {files.length} file{files.length !== 1 ? 's' : ''}
                   {successCount > 0 && (
-                    <span className="ml-2 text-emerald-500">{successCount} uploaded</span>
+                    <span className="ml-2 text-emerald-500">{successCount} complete</span>
+                  )}
+                  {processingCount > 0 && (
+                    <span className="ml-2 text-violet-400">{processingCount} processing</span>
                   )}
                 </h3>
                 <button
@@ -352,7 +485,7 @@ export default function UploadPage() {
                     Upload {pendingCount} file{pendingCount !== 1 ? 's' : ''}
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    Files will be processed by AI after upload
+                    AI processing starts automatically after upload
                   </p>
                 </motion.div>
               )}
@@ -360,19 +493,19 @@ export default function UploadPage() {
           )}
         </AnimatePresence>
 
-        {/* Info card */}
+        {/* Pipeline explanation */}
         <Card className="bg-gradient-to-r from-violet-500/5 to-indigo-500/5 border-violet-500/20">
           <CardContent className="p-5">
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-              <Upload className="w-4 h-4 text-violet-500" />
-              What happens after upload?
+              <Brain className="w-4 h-4 text-violet-500" />
+              AI Processing Pipeline
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { step: '1', title: 'Text Extraction', desc: 'AI reads your document content' },
-                { step: '2', title: 'Smart Classification', desc: 'Automatically categorized' },
-                { step: '3', title: 'Entity Extraction', desc: 'Skills, dates, orgs identified' },
-                { step: '4', title: 'Knowledge Graph', desc: 'Connected to your other memories' },
+                { step: '1', title: 'Text Extraction', desc: 'PDF, DOCX, images parsed automatically', icon: FileText },
+                { step: '2', title: 'Smart Classification', desc: 'Certificate, Resume, Project... auto-detected', icon: Cpu },
+                { step: '3', title: 'Entity Extraction', desc: 'Skills, technologies, organizations, dates', icon: Zap },
+                { step: '4', title: 'Memory Creation', desc: 'Tags, timeline, summary stored in your vault', icon: Brain },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-2.5">
                   <div className="w-5 h-5 rounded-full bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">

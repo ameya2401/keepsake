@@ -47,6 +47,7 @@ import {
   Settings,
   User,
   Clock,
+  Cpu,
 } from 'lucide-react'
 
 export const NAV_ITEMS = [
@@ -61,6 +62,12 @@ export const NAV_ITEMS = [
     href: '/upload',
     icon: Upload,
     description: 'Add new memories',
+  },
+  {
+    label: 'Processing',
+    href: '/processing',
+    icon: Cpu,
+    description: 'AI processing jobs',
   },
   {
     label: 'Memories',

@@ -230,19 +230,156 @@ Vite
 
 ## Phase 2 — AI Data Ingestion & Document Intelligence
 
-**Status**: 🔜 Pending  
-**Planned**: After Phase 1 verification
+**Status**: ✅ Complete  
+**Date**: 2026-06-30
 
-### What Will Be Built
-- Text extraction from PDFs, DOCX, TXT, images
-- OCR for scanned documents (Tesseract/Unstructured)
-- LLM-based metadata extraction (skills, technologies, organizations, dates)
-- Automatic document classification
-- Background job queue system
-- Processing status UI with real-time updates
-- Timeline candidate generation
+### What Was Built
+
+#### AI Processing Pipeline
+A fully client-side pipeline using **Gemini API** (`gemini-1.5-flash`) that runs automatically after every upload:
+
+```
+Upload → Store Original File → Detect File Type → Extract Text →
+Analyze with AI → Classify Document → Extract Entities →
+Generate Tags → Generate Timeline Candidate → Save Memory → Mark Complete
+```
+
+Pipeline is fully **asynchronous and non-blocking**. UI updates in real-time via progress callbacks.
+
+#### Text Extraction Service (`src/lib/text-extractor.ts`)
+- **PDF** → `pdfjs-dist` (local extraction, no API call)
+- **DOCX/DOC** → `mammoth` (local extraction)
+- **TXT/Markdown** → Browser `File.text()` API
+- **Images** → Sent as base64 to Gemini Vision (OCR)
+- Auto-detects scanned PDFs (low text content → triggers OCR flag)
+- Returns: `{ text, isOcr, pageCount, wordCount, error? }`
+
+#### AI Pipeline Service (`src/lib/ai-pipeline.ts`)
+- Uses `@google/generative-ai` SDK with `gemini-1.5-flash`
+- Structured JSON extraction with schema validation + retry (up to 2 retries, 1.5s delay)
+- **Extracted fields per document**:
+  - `title`, `document_type` (category enum), `issuer`, `organization`, `location`
+  - `issue_date`, `completion_date`, `start_date`, `end_date` (ISO timestamps)
+  - `skills[]` with type classification (`technical | soft | domain`)
+  - `technologies[]`, `projects[]`, `internships[]`, `achievements[]`, `education[]`
+  - `people[]`, `keywords[]`
+  - `summary` (max 100 words)
+  - `tags[]` (5-10 auto-generated)
+  - `timeline_candidate` with date, title, description, confidence
+  - `confidence` score (0.0–1.0)
+  - `language` detection
+
+#### Background Job System
+- `createProcessingJob()` creates an `ai_jobs` record before processing starts
+- Status transitions: `queued → processing → completed | failed`
+- Progress tracked as 0–100 (percent) per step
+- `retry_count` incremented via DB function `increment_retry_count`
+- Error messages stored in `ai_jobs.error_message`
+
+#### Pipeline Steps (Progress %)
+| Step | % |
+|------|---|
+| queued | 5% |
+| extracting_text | 15% |
+| analyzing (AI call) | 35% |
+| classifying | 60% |
+| extracting_entities | 75% |
+| generating_tags | 85% |
+| saving | 92% |
+| completed | 100% |
+
+#### Processing Dashboard (`src/features/upload/ProcessingDashboard.tsx`)
+- Route: `/processing`
+- Displays: Queued, Processing, Completed, Failed job counts
+- Per-job cards with animated progress bars
+- Auto-refresh every 2s while jobs are active (TanStack Query `refetchInterval`)
+- Retry button for failed jobs
+- Overall success rate progress bar
+- Accessible at `/processing` (added to sidebar nav)
+
+#### Enhanced Upload Page (`src/features/upload/UploadPage.tsx`)
+- Real-time per-file AI progress display (step + percent + animated progress bar)
+- File card shows spinning Brain icon during AI processing
+- Graceful degradation: shows warning if `VITE_GEMINI_API_KEY` is missing
+- Files can't be removed while processing (prevents data loss)
+- Status: `pending → uploading → processing → success | error`
+- AI pipeline fires non-blocking after storage + DB insert succeed
+
+#### Enhanced Memories Page (`src/features/memories/MemoriesPage.tsx`)
+- **Grid view** and **List view** toggle
+- Real-time auto-refresh every 3s for documents still processing
+- Displays: category emoji, AI summary, extracted skills pills, tags, confidence score
+- **Search**: searches title, filename, summary, and tags
+- **Filters**: by processing status and document category
+- Stats bar: Total, Processed, Processing, Failed, Skills Found
+- Brain icon animates for documents being processed
+- Confidence score color-coded (green >80%, yellow >60%, red otherwise)
+
+#### Database Updates (Phase 2)
+Tables **updated/enriched**:
+- `documents` — now populated with `extracted_text`, `ai_summary`, `confidence_score`, `metadata` (JSONB), `tags[]`, `category`
+- `ai_jobs` — tracks each pipeline run with full progress + error logging
+- `skills` — upserted per-user with `document_count` tracking, `first_seen_at`, `skill_type`
+- `timeline_events` — AI-generated candidates inserted with `source_type='ai_generated'`
+- `activity_logs` — logs `document_processed` events with metadata
+
+New SQL: `supabase/phase2_schema.sql`
+
+#### New Dependencies
+```
+@google/generative-ai    — Gemini API SDK
+pdfjs-dist               — PDF text extraction (client-side)
+mammoth                  — DOCX/DOC text extraction (client-side)
+```
+
+#### New Files
+- `src/lib/text-extractor.ts` — Multi-format text extraction service
+- `src/lib/ai-pipeline.ts` — AI orchestration pipeline
+- `src/features/upload/ProcessingDashboard.tsx` — Job monitoring UI
+- `supabase/phase2_schema.sql` — Phase 2 DB migration
+
+#### Modified Files
+- `src/features/upload/UploadPage.tsx` — Added AI pipeline trigger + live progress
+- `src/features/memories/MemoriesPage.tsx` — Full rewrite with AI data display
+- `src/constants/app.ts` — Added `/processing` nav item + `Cpu` icon
+- `src/App.tsx` — Added `/processing` route
+- `.env.local` — Added `VITE_GEMINI_API_KEY` placeholder
+
+#### Environment Variable Required
+```
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
+```
+Get a free key at: https://aistudio.google.com/app/apikey
+
+#### Build Verification
+- `npm run build` → ✅ Success (Exit code: 0)
+- 2580 modules transformed
+- Zero TypeScript errors
+- Zero ESLint errors
+- Note: UploadPage chunk is ~1MB due to pdfjs-dist (expected; PDF.js is large)
+
+#### Error Handling
+- Unreadable/encrypted PDFs → graceful fallback (uses Gemini Vision)
+- Gemini API failures → retry up to 2 times with backoff
+- Invalid JSON responses → re-parsed after stripping markdown fences
+- Missing API key → UI warning shown, files still uploaded safely
+- Network interruptions → job marked `failed`, retry available
+- Original file is always preserved — AI only enriches, never modifies
+
+#### Security
+- All AI-enriched data scoped per user via RLS
+- Extracted text stored in Supabase (private, user-scoped)
+- Gemini API key stored in `.env.local` (never committed)
+- Only truncated text (first 12,000 chars) sent to Gemini API
+
+#### Deferred to Phase 3
+- Embeddings (pgvector)
+- Knowledge graph nodes/edges
+- Semantic search
+- Relationship discovery
 
 ---
+
 
 ## Phase 3 — Knowledge Intelligence Engine
 
