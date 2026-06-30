@@ -10,7 +10,7 @@ import {
   RefreshCw, Info, X, Network
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/AppShell'
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge, Input, Spinner } from '@/components/ui'
+import { Card, CardContent, Button, Badge, Input, Spinner } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
 import { fetchGraphData, fetchGraphMetrics } from '@/lib/knowledge-graph-service'
 import type { GraphNode, GraphEdge, GraphData, GraphMetrics } from '@/lib/knowledge-graph-service'

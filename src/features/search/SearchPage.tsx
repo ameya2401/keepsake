@@ -7,9 +7,8 @@ import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Sparkles, Clock, FileText, Tag,
-  ChevronRight, Loader2, AlertCircle, Mic, X
+  ChevronRight, Loader2, AlertCircle, X
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { Card, CardContent, Badge, Input } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
@@ -170,7 +169,6 @@ function useSearchHistory() {
 
 export default function SearchPage() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const { history, addToHistory, clearHistory } = useSearchHistory()
 
   const [query, setQuery] = useState('')
