@@ -15,15 +15,33 @@ export default function AuthCallbackPage() {
     let mounted = true
 
     const handleCallback = async () => {
+      // 1. If we already have a session, redirect immediately
+      if (session) {
+        navigate('/dashboard', { replace: true })
+        return
+      }
+
+      // 2. If AuthProvider finished loading and we still don't have a session
+      // (and we aren't in the middle of processing a code)
+      if (!isLoading && !searchParams.get('code')) {
+        navigate('/login?error=no_session', { replace: true })
+        return
+      }
+
       if (processed.current) return
       
       const code = searchParams.get('code')
       
-      // If there's a code, we explicitly exchange it to avoid race conditions
+      // 3. Explicitly exchange code with a timeout
       if (code) {
         processed.current = true
         try {
-          const { error } = await supabase.auth.exchangeCodeForSession(code)
+          const exchangePromise = supabase.auth.exchangeCodeForSession(code)
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Exchange timeout')), 8000)
+          )
+          
+          const { error } = await Promise.race([exchangePromise, timeoutPromise]) as any
           if (error) throw error
           
           if (mounted) {
@@ -32,20 +50,9 @@ export default function AuthCallbackPage() {
         } catch (err) {
           console.error('[AuthCallback] Exchange failed:', err)
           if (mounted) {
-            setErrorMsg('Authentication failed. Please try again.')
-            setTimeout(() => navigate('/login?error=auth_callback_failed', { replace: true }), 3000)
+            setErrorMsg('Authentication failed or timed out. Redirecting...')
+            setTimeout(() => navigate('/login?error=auth_callback_failed', { replace: true }), 2000)
           }
-        }
-        return
-      }
-
-      // If no code is present in URL (e.g., standard redirect or already processed)
-      // wait for AuthProvider to finish loading
-      if (!isLoading) {
-        if (session) {
-          navigate('/dashboard', { replace: true })
-        } else {
-          navigate('/login?error=no_session', { replace: true })
         }
       }
     }
