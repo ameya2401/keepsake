@@ -1,13 +1,18 @@
 // ============================================================
 // MemoryVerse — AI Processing Pipeline
 // Uses Gemini API for document intelligence
-// Processes: text extraction → metadata → classification → entities → tags → timeline
+// Phase 2: text extraction → metadata → classification → entities → tags → timeline
+// Phase 3: embeddings → knowledge graph → recommendations → memory score
 // ============================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { extractText, fileToBase64, isImageFile } from './text-extractor'
 import { supabase } from './supabase'
 import type { DocumentCategory } from '@/types/database'
+import { generateDocumentEmbeddings, findSimilarMemories } from './embedding-service'
+import { buildKnowledgeGraphForDocument } from './knowledge-graph-service'
+import { generateRecommendations } from './recommendation-engine'
+import { computeMemoryScore } from './reasoning-api'
 
 // ─────────────────────────────────────────────────────────────
 // Gemini Client
@@ -72,6 +77,9 @@ export type PipelineStep =
   | 'generating_tags'
   | 'building_timeline'
   | 'saving'
+  | 'generating_embeddings'
+  | 'building_knowledge_graph'
+  | 'generating_recommendations'
   | 'completed'
   | 'failed'
 
@@ -427,11 +435,54 @@ export async function runAIPipeline(
     // Save extracted entities
     await saveExtractedEntities(documentId, userId, aiResult)
 
+    // ── Phase 3: Intelligence Pipeline ─────────────────────
+
+    // ── Step 8: Generate Embeddings ─────────────────────────
+    report('generating_embeddings', 94, 'Generating semantic embeddings...')
+    await updateJobStatus(jobId, 'processing', 94)
+    try {
+      await generateDocumentEmbeddings(documentId, userId)
+    } catch (embErr) {
+      console.warn('[Pipeline] Embedding generation failed (non-fatal):', embErr)
+    }
+
+    // ── Step 9: Build Knowledge Graph ───────────────────────
+    report('building_knowledge_graph', 96, 'Building knowledge graph...')
+    await updateJobStatus(jobId, 'processing', 96)
+    try {
+      await buildKnowledgeGraphForDocument(documentId, userId)
+    } catch (graphErr) {
+      console.warn('[Pipeline] Knowledge graph build failed (non-fatal):', graphErr)
+    }
+
+    // ── Step 10: Find Similar Memories ──────────────────────
+    try {
+      await findSimilarMemories(documentId, userId, 5)
+    } catch (simErr) {
+      console.warn('[Pipeline] Similar memory detection failed (non-fatal):', simErr)
+    }
+
+    // ── Step 11: Compute Memory Score ───────────────────────
+    try {
+      await computeMemoryScore(documentId, userId)
+    } catch (scoreErr) {
+      console.warn('[Pipeline] Memory score computation failed (non-fatal):', scoreErr)
+    }
+
+    // ── Step 12: Generate Recommendations ───────────────────
+    report('generating_recommendations', 98, 'Generating smart recommendations...')
+    await updateJobStatus(jobId, 'processing', 98)
+    try {
+      await generateRecommendations(userId)
+    } catch (recErr) {
+      console.warn('[Pipeline] Recommendation generation failed (non-fatal):', recErr)
+    }
+
     // Mark job complete
     await updateJobStatus(jobId, 'completed', 100)
 
-    // ── Step 8: Done ────────────────────────────────────────
-    report('completed', 100, 'Memory created successfully!')
+    // ── Step 13: Done ────────────────────────────────────────
+    report('completed', 100, 'Memory created and intelligence updated!')
 
     return { success: true }
   } catch (error) {
