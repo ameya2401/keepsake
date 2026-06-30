@@ -74,6 +74,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let mounted = true
 
     const initAuth = async () => {
+      // Safety timeout to prevent infinite loading state
+      const fallbackTimeout = setTimeout(() => {
+        if (mounted && isLoading) {
+          console.warn('[MemoryVerse] Auth init timeout, forcing load completion')
+          setIsLoading(false)
+        }
+      }, 5000)
+
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession()
 
@@ -85,11 +93,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await fetchProfile(initialSession.user.id)
           }
 
+          clearTimeout(fallbackTimeout)
           setIsLoading(false)
         }
       } catch (error) {
-        console.warn('[MemoryVerse] Auth initialization failed (likely missing env vars):', error)
+        console.warn('[MemoryVerse] Auth initialization failed:', error)
         if (mounted) {
+          clearTimeout(fallbackTimeout)
           setIsLoading(false)
         }
       }
