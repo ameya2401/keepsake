@@ -7,8 +7,8 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
 
-// Configure PDF.js worker using CDN (avoids build issues)
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
+// Configure PDF.js worker using unpkg CDN (avoids build and version mismatch issues)
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
 
 // ─────────────────────────────────────────────────────────────
 // Types
