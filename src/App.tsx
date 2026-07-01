@@ -23,6 +23,8 @@ const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const UploadPage = lazy(() => import('@/features/upload/UploadPage'))
 const ProcessingDashboard = lazy(() => import('@/features/upload/ProcessingDashboard'))
 const MemoriesPage = lazy(() => import('@/features/memories/MemoriesPage'))
+const MemoryDetailPage = lazy(() => import('@/features/memories/MemoryDetailPage'))
+const ResumeAnalyzerPage = lazy(() => import('@/features/assistant/ResumeAnalyzerPage'))
 const TimelinePage = lazy(() => import('@/features/timeline/TimelinePage'))
 const KnowledgeGraphPage = lazy(() => import('@/features/knowledge-graph/KnowledgeGraphPage'))
 const SearchPage = lazy(() => import('@/features/search/SearchPage'))
@@ -142,6 +144,26 @@ const router = createBrowserRouter([
       <ProtectedRoute>
         <Suspense fallback={<PageLoader />}>
           <MemoriesPage />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/memories/:id',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<PageLoader />}>
+          <MemoryDetailPage />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/resume-analyzer',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<PageLoader />}>
+          <ResumeAnalyzerPage />
         </Suspense>
       </ProtectedRoute>
     ),

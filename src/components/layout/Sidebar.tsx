@@ -68,9 +68,9 @@ export function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                   )}
                 />
                 <span className="flex-1 truncate">{item.label}</span>
-                {'badge' in item && item.badge && (
+                {'badge' in item && item.badge !== undefined && (
                   <Badge variant="secondary" className="text-[10px] py-0 h-4 px-1.5">
-                    {item.badge}
+                    {String(item.badge)}
                   </Badge>
                 )}
                 {isActive && (

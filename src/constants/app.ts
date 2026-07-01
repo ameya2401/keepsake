@@ -48,6 +48,7 @@ import {
   User,
   Clock,
   Cpu,
+  FileText,
 } from 'lucide-react'
 
 export const NAV_ITEMS = [
@@ -98,7 +99,12 @@ export const NAV_ITEMS = [
     href: '/assistant',
     icon: MessageSquare,
     description: 'Chat with your memories',
-    badge: 'Soon' as const,
+  },
+  {
+    label: 'Resume Analyzer',
+    href: '/resume-analyzer',
+    icon: FileText,
+    description: 'Analyze and improve your resume',
   },
   {
     label: 'Insights',

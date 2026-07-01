@@ -2,6 +2,7 @@ import { useState, useEffect, type ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { Sidebar } from './Sidebar'
 import { Navbar } from './Navbar'
+import { CommandPalette, useCommandPalette } from '@/components/common/CommandPalette'
 
 // ─────────────────────────────────────────────────────────────
 // Props
@@ -20,6 +21,7 @@ interface AppShellProps {
 export function AppShell({ children, title, breadcrumb }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const { isOpen: cmdOpen, setIsOpen: setCmdOpen } = useCommandPalette()
 
   // Detect mobile breakpoint
   useEffect(() => {
@@ -50,6 +52,7 @@ export function AppShell({ children, title, breadcrumb }: AppShellProps) {
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
           title={title}
           breadcrumb={breadcrumb}
+          onCommandPaletteOpen={() => setCmdOpen(true)}
         />
 
         {/* Page content */}
@@ -62,6 +65,9 @@ export function AppShell({ children, title, breadcrumb }: AppShellProps) {
           {children}
         </motion.main>
       </div>
+
+      {/* Global Command Palette */}
+      <CommandPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
     </div>
   )
 }
