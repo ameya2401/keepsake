@@ -11,7 +11,7 @@ import {
   Brain, Upload, BookOpen, GitBranch, TrendingUp, Star,
   Clock, Zap, FileText, Award, Briefcase, Code,
   Sparkles, ArrowRight, RefreshCw, Loader2, MessageSquare,
-  Target, Calendar
+  Target, Calendar, Play
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, Badge } from '@/components/ui'
@@ -19,6 +19,8 @@ import { supabase } from '@/lib/supabase'
 import { fetchRecommendations } from '@/lib/recommendation-engine'
 import type { RecommendationItem } from '@/lib/recommendation-engine'
 import { cn } from '@/lib/utils'
+import { Onboarding } from '@/components/common/Onboarding'
+import { seedDemoData } from '@/lib/demo-seeder'
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -209,6 +211,8 @@ function RecentMemoryRow({ memory }: { memory: RecentMemory }) {
 export default function DashboardPage() {
   const { profile, user } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [isDemoSeeding, setIsDemoSeeding] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     totalMemories: 0, projects: 0, certificates: 0, internships: 0,
     skills: 0, connections: 0, timelineEvents: 0, aiInsights: 0,
@@ -274,10 +278,23 @@ export default function DashboardPage() {
 
       setRecentMemories((recentResult.data || []) as RecentMemory[])
       setInsights(recommendationsResult.slice(0, 3))
+
+      // Show onboarding for brand-new users (no documents)
+      if ((docs.length === 0) && !localStorage.getItem(`keepsake_onboarded_${user.id}`)) {
+        setShowOnboarding(true)
+      }
     } finally {
       setIsLoading(false)
     }
   }, [user?.id])
+
+  const handleDemoLoad = useCallback(async () => {
+    if (!user?.id) return
+    setIsDemoSeeding(true)
+    await seedDemoData(user.id)
+    setIsDemoSeeding(false)
+    loadDashboard()
+  }, [user?.id, loadDashboard])
 
   useEffect(() => { loadDashboard() }, [loadDashboard])
 
@@ -303,6 +320,16 @@ export default function DashboardPage() {
 
   return (
     <AppShell title="Dashboard" breadcrumb={[{ label: 'Dashboard' }]}>
+      {/* Onboarding overlay */}
+      {showOnboarding && (
+        <Onboarding
+          onComplete={() => {
+            setShowOnboarding(false)
+            localStorage.setItem(`keepsake_onboarded_${user?.id}`, '1')
+          }}
+        />
+      )}
+
       <div className="p-6 max-w-7xl mx-auto space-y-8">
 
         {/* Welcome Banner */}
@@ -362,6 +389,19 @@ export default function DashboardPage() {
                   <MessageSquare className="w-4 h-4" />
                   Ask AI
                 </Link>
+                {stats.totalMemories === 0 && (
+                  <button
+                    onClick={handleDemoLoad}
+                    disabled={isDemoSeeding}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium transition-colors border border-white/10 disabled:opacity-50"
+                  >
+                    {isDemoSeeding ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" />Loading demo…</>
+                    ) : (
+                      <><Play className="w-4 h-4" />Load Demo Workspace</>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 

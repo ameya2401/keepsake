@@ -18,6 +18,7 @@ const LoginPage = lazy(() => import('@/features/authentication/LoginPage'))
 const SignupPage = lazy(() => import('@/features/authentication/SignupPage'))
 const ForgotPasswordPage = lazy(() => import('@/features/authentication/ForgotPasswordPage'))
 const AuthCallbackPage = lazy(() => import('@/features/authentication/AuthCallbackPage'))
+const LandingPage = lazy(() => import('@/pages/LandingPage'))
 
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const UploadPage = lazy(() => import('@/features/upload/UploadPage'))
@@ -69,10 +70,14 @@ const queryClient = new QueryClient({
 // ─────────────────────────────────────────────────────────────
 
 const router = createBrowserRouter([
-  // Public routes
+  // Landing page (public)
   {
     path: '/',
-    element: <Navigate to="/login" replace />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <LandingPage />
+      </Suspense>
+    ),
   },
   {
     path: '/login',
