@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Timeline Page (Phase 3)
+// Keepsake — Timeline Page (Phase 3)
 // Chronological view with intelligence patterns and milestone detection
 // ============================================================
 
@@ -400,7 +400,7 @@ export default function TimelinePage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Timeline is empty</h3>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                Upload documents with dates and MemoryVerse will automatically build your professional timeline.
+                Upload documents with dates and Keepsake will automatically build your professional timeline.
                 You can also add events manually using the button above.
               </p>
             </CardContent>

@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Semantic Search Page (Phase 3)
+// Keepsake — Semantic Search Page (Phase 3)
 // Understands meaning, not just keywords
 // ============================================================
 

@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — AI Processing Pipeline
+// Keepsake — AI Processing Pipeline
 // Uses Gemini API for document intelligence
 // Phase 2: text extraction → metadata → classification → entities → tags → timeline
 // Phase 3: embeddings → knowledge graph → recommendations → memory score
@@ -107,7 +107,7 @@ function parseJsonResponse(raw: string): unknown {
 // AI Analysis Prompt
 // ─────────────────────────────────────────────────────────────
 
-const EXTRACTION_PROMPT = `You are a document intelligence engine for MemoryVerse, an AI-powered career memory system.
+const EXTRACTION_PROMPT = `You are a document intelligence engine for Keepsake, an AI-powered career memory system.
 
 Analyze this document and extract structured information. Return ONLY valid JSON with no markdown formatting.
 

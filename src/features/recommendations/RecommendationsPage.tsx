@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Recommendations Page (Phase 3)
+// Keepsake — Recommendations Page (Phase 3)
 // Contextual career recommendations from the intelligence engine
 // ============================================================
 
@@ -295,7 +295,7 @@ export default function RecommendationsPage() {
         {/* Tip */}
         {!isLoading && (
           <p className="text-xs text-center text-muted-foreground">
-            Dismiss recommendations you've acted on. MemoryVerse learns from your collection as you add more memories.
+            Dismiss recommendations you've acted on. Keepsake learns from your collection as you add more memories.
           </p>
         )}
       </div>

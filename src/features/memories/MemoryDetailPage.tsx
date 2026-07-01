@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Memory Detail Page (Phase 4)
+// Keepsake — Memory Detail Page (Phase 4)
 // Full per-memory view with AI narrative, graph preview, related memories
 // ============================================================
 

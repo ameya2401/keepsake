@@ -1,8 +1,8 @@
 // ============================================================
-// MemoryVerse — Application Constants
+// Keepsake — Application Constants
 // ============================================================
 
-export const APP_NAME = 'MemoryVerse'
+export const APP_NAME = 'Keepsake'
 export const APP_DESCRIPTION = 'AI-powered Memory Operating System'
 export const APP_VERSION = '0.1.0'
 

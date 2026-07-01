@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Interactive Knowledge Graph Visualization
+// Keepsake — Interactive Knowledge Graph Visualization
 // Pure canvas/SVG-based graph with no external graph libraries
 // ============================================================
 
@@ -628,7 +628,7 @@ export default function KnowledgeGraphPage() {
                   </div>
                   <h3 className="font-semibold text-lg mb-2">Knowledge Graph is building</h3>
                   <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                    Upload and process documents. MemoryVerse will automatically discover entities and
+                    Upload and process documents. Keepsake will automatically discover entities and
                     relationships to populate your knowledge graph.
                   </p>
                 </div>

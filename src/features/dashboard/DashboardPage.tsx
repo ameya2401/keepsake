@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Dashboard (Phase 4)
+// Keepsake — Dashboard (Phase 4)
 // Personalized home with live stats, AI insights, and daily digest
 // ============================================================
 
@@ -324,7 +324,7 @@ export default function DashboardPage() {
               {stats.totalMemories > 0 ? (
                 <div className="space-y-1">
                   <p className="text-violet-100 text-sm">
-                    MemoryVerse has indexed <strong>{stats.totalMemories} memories</strong> and discovered{' '}
+                    Keepsake has indexed <strong>{stats.totalMemories} memories</strong> and discovered{' '}
                     <strong>{stats.connections} knowledge connections</strong>.
                   </p>
                   {stats.processedToday > 0 && (
@@ -342,7 +342,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <p className="text-violet-100 text-sm max-w-md">
-                  Your knowledge universe is ready. Upload your first memory and watch MemoryVerse
+                  Your knowledge universe is ready. Upload your first memory and watch Keepsake
                   build your professional intelligence map.
                 </p>
               )}

@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Embedding Service (Phase 3)
+// Keepsake — Embedding Service (Phase 3)
 // Uses Gemini text-embedding-004 as the primary embedding model
 // Falls back gracefully if API is unavailable
 // ============================================================

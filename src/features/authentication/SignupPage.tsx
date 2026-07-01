@@ -74,7 +74,7 @@ export default function SignupPage() {
             <Brain className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-xl font-bold text-white">MemoryVerse</span>
+            <span className="text-xl font-bold text-white">Keepsake</span>
             <p className="text-xs text-violet-300">AI Memory OS</p>
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function SignupPage() {
             <span className="text-violet-300">knowledge universe.</span>
           </h1>
           <p className="text-violet-200 text-lg leading-relaxed max-w-md">
-            Upload once. MemoryVerse remembers everything — skills, projects,
+            Upload once. Keepsake remembers everything — skills, projects,
             certifications, internships — all connected intelligently.
           </p>
           <div className="grid grid-cols-2 gap-3 max-w-md">
@@ -124,7 +124,7 @@ export default function SignupPage() {
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold">MemoryVerse</span>
+            <span className="font-bold">Keepsake</span>
           </div>
 
           <div className="space-y-1">

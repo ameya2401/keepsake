@@ -27,7 +27,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-const STORAGE_KEY = 'memoryverse-theme'
+const STORAGE_KEY = 'keepsake-theme'
 
 // ─────────────────────────────────────────────────────────────
 // Provider

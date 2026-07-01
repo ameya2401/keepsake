@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Knowledge Graph Service (Phase 3)
+// Keepsake — Knowledge Graph Service (Phase 3)
 // Builds and maintains the knowledge graph in Supabase
 // ============================================================
 
@@ -41,7 +41,7 @@ export interface GraphData {
 // AI-powered relationship discovery prompt
 // ─────────────────────────────────────────────────────────────
 
-const RELATIONSHIP_PROMPT = `You are a knowledge graph builder for MemoryVerse, a career intelligence system.
+const RELATIONSHIP_PROMPT = `You are a knowledge graph builder for Keepsake, a career intelligence system.
 
 Given the following document metadata, extract all knowledge graph entities and their relationships.
 

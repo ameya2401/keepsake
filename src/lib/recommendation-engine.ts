@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Recommendation Engine (Phase 3)
+// Keepsake — Recommendation Engine (Phase 3)
 // Generates intelligent, contextual career recommendations
 // ============================================================
 
@@ -73,7 +73,7 @@ async function fetchUserContext(userId: string): Promise<UserContext> {
 // AI-powered recommendation generation
 // ─────────────────────────────────────────────────────────────
 
-const RECOMMENDATION_PROMPT = `You are an intelligent career advisor for MemoryVerse. Based on a user's uploaded documents and skills, generate specific, actionable career recommendations.
+const RECOMMENDATION_PROMPT = `You are an intelligent career advisor for Keepsake. Based on a user's uploaded documents and skills, generate specific, actionable career recommendations.
 
 Return ONLY valid JSON with no markdown:
 {
@@ -157,7 +157,7 @@ function generateRuleBasedRecommendations(context: UserContext): AIRecommendatio
       type: 'resume_update',
       title: 'Upload your resume',
       description:
-        'Your knowledge base has no resume. Uploading one will let MemoryVerse cross-reference your skills, projects, and experiences to identify gaps.',
+        'Your knowledge base has no resume. Uploading one will let Keepsake cross-reference your skills, projects, and experiences to identify gaps.',
       impact: 'high',
       document_reference: null,
     })
@@ -205,7 +205,7 @@ function generateRuleBasedRecommendations(context: UserContext): AIRecommendatio
       type: 'missing_metadata',
       title: 'Add dates to your documents',
       description:
-        'Your timeline is empty. Ensure your documents contain clear dates so MemoryVerse can automatically build your career timeline.',
+        'Your timeline is empty. Ensure your documents contain clear dates so Keepsake can automatically build your career timeline.',
       impact: 'medium',
       document_reference: null,
     })

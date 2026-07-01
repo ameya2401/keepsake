@@ -70,7 +70,7 @@ export default function LoginPage() {
             <Brain className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-xl font-bold text-white">MemoryVerse</span>
+            <span className="text-xl font-bold text-white">Keepsake</span>
             <p className="text-xs text-violet-300">AI Memory OS</p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function LoginPage() {
             <span className="text-violet-300">finally connected.</span>
           </h1>
           <p className="text-violet-200 text-lg leading-relaxed max-w-md">
-            MemoryVerse transforms your documents into an intelligent knowledge network.
+            Keepsake transforms your documents into an intelligent knowledge network.
             Every upload becomes a searchable, connected memory.
           </p>
 
@@ -121,7 +121,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold">MemoryVerse</span>
+            <span className="font-bold">Keepsake</span>
           </div>
 
           {/* Header */}

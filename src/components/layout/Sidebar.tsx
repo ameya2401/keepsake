@@ -34,7 +34,7 @@ export function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
           <Brain className="w-5 h-5 text-white" />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-sm tracking-tight">MemoryVerse</span>
+          <span className="font-bold text-sm tracking-tight">Keepsake</span>
           <span className="text-[10px] text-muted-foreground">AI Memory OS</span>
         </div>
         {isMobile && (

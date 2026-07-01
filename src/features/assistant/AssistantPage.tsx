@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — AI Assistant (Phase 4)
+// Keepsake — AI Assistant (Phase 4)
 // Full conversational AI that understands the user's complete journey
 // ============================================================
 
@@ -367,7 +367,7 @@ export default function AssistantPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-semibold text-base">MemoryVerse AI</h1>
+                <h1 className="font-semibold text-base">Keepsake AI</h1>
                 <Badge className="text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 inline-block" />
                   Active

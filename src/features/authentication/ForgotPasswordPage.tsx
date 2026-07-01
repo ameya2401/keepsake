@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600">
             <Brain className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold">MemoryVerse</span>
+          <span className="font-bold">Keepsake</span>
         </div>
 
         <div className="space-y-1">

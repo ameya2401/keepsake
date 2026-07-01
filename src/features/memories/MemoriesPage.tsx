@@ -289,7 +289,7 @@ function EmptyState({ hasFilter }: { hasFilter: boolean }) {
       <p className="text-sm text-muted-foreground max-w-sm mb-6">
         {hasFilter
           ? 'Try adjusting your search or filter criteria'
-          : 'Upload your first document and MemoryVerse will transform it into an intelligent Memory Object'}
+          : 'Upload your first document and Keepsake will transform it into an intelligent Memory Object'}
       </p>
       {!hasFilter && (
         <Link

@@ -361,7 +361,7 @@ export default function UploadPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Upload Memories</h1>
           <p className="text-muted-foreground text-sm">
-            Upload documents and MemoryVerse will extract knowledge, skills, and create intelligent Memory Objects automatically.
+            Upload documents and Keepsake will extract knowledge, skills, and create intelligent Memory Objects automatically.
           </p>
         </div>
 

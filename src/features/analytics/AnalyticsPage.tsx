@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Analytics Page (Phase 3)
+// Keepsake — Analytics Page (Phase 3)
 // Knowledge Density, Memory Health Scores, and Reasoning API
 // ============================================================
 

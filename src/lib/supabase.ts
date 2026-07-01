@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 // ============================================================
-// MemoryVerse — Supabase Client
+// Keepsake — Supabase Client
 // ============================================================
 
 import { createClient } from '@supabase/supabase-js'
@@ -10,7 +10,7 @@ const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || 'p
 
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
   console.warn(
-    '[MemoryVerse] Supabase environment variables not set.\n' +
+    '[Keepsake] Supabase environment variables not set.\n' +
     'Copy .env.example to .env.local and add your Supabase credentials.\n' +
     'Authentication and storage features will not work until configured.'
   )

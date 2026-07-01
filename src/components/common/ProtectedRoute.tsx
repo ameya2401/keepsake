@@ -16,7 +16,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Spinner size="lg" />
-          <p className="text-sm text-muted-foreground">Loading MemoryVerse...</p>
+          <p className="text-sm text-muted-foreground">Loading Keepsake...</p>
         </div>
       </div>
     )

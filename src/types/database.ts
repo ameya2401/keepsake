@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Core Database Types
+// Keepsake — Core Database Types
 // Mirrors the Supabase PostgreSQL schema exactly
 // ============================================================
 

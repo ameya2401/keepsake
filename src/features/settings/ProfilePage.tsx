@@ -102,7 +102,7 @@ export default function ProfilePage() {
                   <Label htmlFor="bio">Bio</Label>
                   <textarea
                     id="bio"
-                    placeholder="Tell MemoryVerse about yourself..."
+                    placeholder="Tell Keepsake about yourself..."
                     className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                     {...register('bio')}
                   />

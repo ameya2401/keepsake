@@ -1,4 +1,4 @@
-# MemoryVerse — Implementation Context Log
+# Keepsake — Implementation Context Log
 
 > This document tracks exactly what was implemented, when, and why.
 > Updated after each phase completion.
@@ -7,7 +7,7 @@
 
 ## Project Overview
 
-**MemoryVerse** is an AI-powered Memory Operating System that understands a person's academic and professional journey.
+**Keepsake** is an AI-powered Memory Operating System that understands a person's academic and professional journey.
 
 - **Type**: Hackathon project + personal passion project
 - **Goal**: Transform documents into intelligent, connected knowledge
@@ -30,7 +30,7 @@
 
 #### Design System
 - CSS custom properties (HSS tokens) for light and dark modes
-- MemoryVerse brand colors: violet/indigo/cyan palette
+- Keepsake brand colors: violet/indigo/cyan palette
 - Custom animations: fade-in, slide-up, slide-in-right, pulse-glow, shimmer
 - Custom components: glass-card, gradient-text, shimmer, glow-primary, sidebar-item
 - Google Fonts: Inter (UI) + JetBrains Mono (code)
@@ -82,7 +82,7 @@ src/
 
 #### Theme System
 - ThemeProvider with `light | dark | system` modes
-- localStorage persistence (`memoryverse-theme`)
+- localStorage persistence (`keepsake-theme`)
 - System preference detection via `prefers-color-scheme` media query
 - Real-time system preference change listener
 - Dark mode as default
@@ -459,7 +459,7 @@ Copy `.env.example` to `.env.local`:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_APP_URL=http://localhost:5173
-VITE_APP_NAME=MemoryVerse
+VITE_APP_NAME=Keepsake
 ```
 
 Run schema in Supabase SQL Editor: `supabase/schema.sql`

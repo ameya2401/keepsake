@@ -1,5 +1,5 @@
 -- ============================================================
--- MemoryVerse — Phase 2 Schema Additions
+-- Keepsake — Phase 2 Schema Additions
 -- Run this in the Supabase SQL Editor after the Phase 1 schema
 -- ============================================================
 

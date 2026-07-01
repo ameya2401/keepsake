@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Global Command Palette (Phase 4)
+// Keepsake — Global Command Palette (Phase 4)
 // Ctrl+K to search anything, navigate anywhere, ask the AI
 // ============================================================
 

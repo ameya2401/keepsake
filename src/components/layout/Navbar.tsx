@@ -27,7 +27,7 @@ const DEMO_NOTIFICATIONS = [
     id: '1',
     type: 'insight',
     title: 'New AI insight generated',
-    description: 'MemoryVerse found 3 new connections in your knowledge graph.',
+    description: 'Keepsake found 3 new connections in your knowledge graph.',
     time: '2m ago',
     unread: true,
   },

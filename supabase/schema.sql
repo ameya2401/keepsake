@@ -1,5 +1,5 @@
 -- ============================================================
--- MemoryVerse — Complete Database Schema
+-- Keepsake — Complete Database Schema
 -- Run this in your Supabase SQL Editor
 -- ============================================================
 

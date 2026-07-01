@@ -77,7 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Safety timeout to prevent infinite loading state
       const fallbackTimeout = setTimeout(() => {
         if (mounted && isLoading) {
-          console.warn('[MemoryVerse] Auth init timeout, forcing load completion')
+          console.warn('[Keepsake] Auth init timeout, forcing load completion')
           setIsLoading(false)
         }
       }, 5000)
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setIsLoading(false)
         }
       } catch (error) {
-        console.warn('[MemoryVerse] Auth initialization failed:', error)
+        console.warn('[Keepsake] Auth initialization failed:', error)
         if (mounted) {
           clearTimeout(fallbackTimeout)
           setIsLoading(false)

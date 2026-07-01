@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Reasoning API (Phase 3)
+// Keepsake — Reasoning API (Phase 3)
 // Cross-memory reasoning using Gemini — no conversational UI
 // ============================================================
 
@@ -34,7 +34,7 @@ export interface MemoryScore {
 // Cross-memory reasoning prompt
 // ─────────────────────────────────────────────────────────────
 
-const REASONING_PROMPT = `You are a career intelligence reasoning engine for MemoryVerse.
+const REASONING_PROMPT = `You are a career intelligence reasoning engine for Keepsake.
 
 Answer the question by reasoning across the user's memory objects (documents, skills, projects, etc.).
 

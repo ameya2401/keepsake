@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Resume Analyzer (Phase 4)
+// Keepsake — Resume Analyzer (Phase 4)
 // Compare memories against your resume; detect gaps and suggest updates
 // ============================================================
 

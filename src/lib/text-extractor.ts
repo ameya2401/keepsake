@@ -1,5 +1,5 @@
 // ============================================================
-// MemoryVerse — Text Extraction Service
+// Keepsake — Text Extraction Service
 // Extracts clean plain text from uploaded documents
 // Supports: PDF, DOCX, TXT, MD, Images (via base64 for Gemini)
 // ============================================================

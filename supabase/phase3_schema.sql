@@ -1,5 +1,5 @@
 -- ============================================================
--- MemoryVerse — Phase 3 Schema: Knowledge Intelligence Engine
+-- Keepsake — Phase 3 Schema: Knowledge Intelligence Engine
 -- Run this in the Supabase SQL Editor after Phase 1 & 2 schemas
 -- ============================================================
 
