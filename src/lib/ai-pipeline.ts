@@ -5,7 +5,7 @@
 // Phase 3: embeddings → knowledge graph → recommendations → memory score
 // ============================================================
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { extractText, fileToBase64, isImageFile } from './text-extractor'
 import { supabase } from './supabase'
 import type { DocumentCategory } from '@/types/database'
@@ -18,13 +18,13 @@ import { computeMemoryScore } from './reasoning-api'
 // Gemini Client
 // ─────────────────────────────────────────────────────────────
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || ''
 
-function getGeminiClient() {
-  if (!GEMINI_API_KEY) {
-    throw new Error('VITE_GEMINI_API_KEY is not configured. Please add it to your .env.local file.')
+function getGroqClient() {
+  if (!GROQ_API_KEY) {
+    throw new Error('VITE_GROQ_API_KEY is not configured. Please add it to your .env.local file.')
   }
-  return new GoogleGenerativeAI(GEMINI_API_KEY)
+  return new Groq({ apiKey: GROQ_API_KEY, dangerouslyAllowBrowser: true })
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -177,37 +177,49 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2, delay = 1500):
 // Core AI Analysis
 // ─────────────────────────────────────────────────────────────
 
-async function analyzeWithGemini(
+async function analyzeWithGroq(
   text: string,
   file: File | null
 ): Promise<AIExtractionResult> {
-  const genAI = getGeminiClient()
+  const groq = getGroqClient()
 
   return withRetry(async () => {
-    let result: { response: { text: () => string } }
+    let rawResponse = ''
 
     if (file && isImageFile(file.type)) {
-      // Use Gemini Vision for images
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+      // Use Groq Vision for images
       const base64 = await fileToBase64(file)
-      const imagePart = {
-        inlineData: {
-          data: base64,
-          mimeType: file.type,
-        },
-      }
-      result = await model.generateContent([
-        EXTRACTION_PROMPT + '\n[Document is an image — analyze the visual content directly]',
-        imagePart,
-      ])
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: EXTRACTION_PROMPT + '\n[Document is an image — analyze the visual content directly]' },
+              { type: 'image_url', image_url: { url: `data:${file.type};base64,${base64}` } }
+            ]
+          }
+        ],
+        model: 'llama-3.2-11b-vision-preview',
+        temperature: 0.1,
+      })
+      rawResponse = chatCompletion.choices[0]?.message?.content || '{}'
     } else {
       // Text-based analysis
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-      const truncatedText = text.slice(0, 12000) // Gemini context window safe limit
-      result = await model.generateContent(EXTRACTION_PROMPT + truncatedText)
+      const truncatedText = text.slice(0, 20000) // Groq context window safe limit
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'user',
+            content: EXTRACTION_PROMPT + truncatedText
+          }
+        ],
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.1,
+        response_format: { type: 'json_object' }
+      })
+      rawResponse = chatCompletion.choices[0]?.message?.content || '{}'
     }
 
-    const rawResponse = result.response.text()
     const parsed = parseJsonResponse(rawResponse) as Partial<AIExtractionResult>
 
     // Validate and sanitize
@@ -379,7 +391,7 @@ export async function runAIPipeline(
     await updateDocumentStatus(documentId, 'processing')
     await updateJobStatus(jobId, 'processing', 35)
 
-    const aiResult = await analyzeWithGemini(extractionResult.text, file)
+    const aiResult = await analyzeWithGroq(extractionResult.text, file)
 
     // ── Step 4: Classification ──────────────────────────────
     report('classifying', 60, `Classified as: ${aiResult.document_type}`)
