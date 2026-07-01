@@ -261,8 +261,9 @@ export default function UploadPage() {
       // ── 1. Upload to Storage ──────────────────────────────
       updateFile(uploadFile.id, { status: 'uploading', uploadProgress: 10 })
 
-      const { error: storageError } = await supabase.storage
-        .from(STORAGE_BUCKETS.DOCUMENTS)
+      try {
+        const { error: storageError } = await supabase.storage
+          .from(STORAGE_BUCKETS.DOCUMENTS)
         .upload(storagePath, uploadFile.file, {
           cacheControl: '3600',
           upsert: false,
@@ -341,6 +342,13 @@ export default function UploadPage() {
           }
         }
       )
+      } catch (err: any) {
+        console.error('[UploadPage] Upload failed:', err)
+        updateFile(uploadFile.id, {
+          status: 'error',
+          error: err?.message || 'An unexpected error occurred during upload',
+        })
+      }
     }
 
     setIsUploading(false)

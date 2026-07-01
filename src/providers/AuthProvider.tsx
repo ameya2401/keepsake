@@ -22,7 +22,7 @@ interface AuthContextValue {
   isAuthenticated: boolean
   signInWithGoogle: () => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>
-  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>
+  signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ data: any; error: Error | null }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
   refreshProfile: () => Promise<void>
@@ -153,7 +153,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const signUpWithEmail = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -161,7 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
-    return { error: error as Error | null }
+    return { data, error: error as Error | null }
   }
 
   const signOut = async () => {

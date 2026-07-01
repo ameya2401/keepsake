@@ -46,11 +46,14 @@ export default function SignupPage() {
 
   const onSubmit = async (values: SignupFormValues) => {
     setServerError('')
-    const { error } = await signUpWithEmail(values.email, values.password, values.fullName)
+    const { data, error } = await signUpWithEmail(values.email, values.password, values.fullName)
     if (error) {
       setServerError(error.message)
-    } else {
+    } else if (!data?.session) {
+      // If no session is returned, it means email confirmation is required
       setSuccessMessage('Check your email to confirm your account!')
+    } else {
+      // If a session IS returned, email confirmation is disabled and AuthProvider will auto-redirect
     }
   }
 
