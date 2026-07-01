@@ -3,10 +3,10 @@
 // Cross-memory reasoning using Gemini — no conversational UI
 // ============================================================
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { supabase } from './supabase'
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || ''
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -130,17 +130,21 @@ export async function reasonAcrossMemories(
     reasoning_chain: [],
   }
 
-  if (!GEMINI_API_KEY) return fallback
+  if (!GROQ_API_KEY) return fallback
 
   try {
     const context = await fetchReasoningContext(userId)
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const groq = new Groq({ apiKey: GROQ_API_KEY, dangerouslyAllowBrowser: true })
 
     const prompt = REASONING_PROMPT.replace('{QUESTION}', question).replace('{CONTEXT}', context)
 
-    const result = await model.generateContent(prompt)
-    const raw = result.response.text().trim()
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.1,
+      response_format: { type: 'json_object' }
+    })
+    const raw = chatCompletion.choices[0]?.message?.content || '{}'
     const cleaned = raw.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()
     const parsed = JSON.parse(cleaned) as Omit<ReasoningAnswer, 'question'>
 

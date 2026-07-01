@@ -3,11 +3,11 @@
 // Builds and maintains the knowledge graph in Supabase
 // ============================================================
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { supabase } from './supabase'
 import type { NodeType } from '@/types/database'
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || ''
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -103,15 +103,19 @@ interface RelationshipResult {
 async function extractRelationshipsWithAI(
   documentMetadata: Record<string, unknown>
 ): Promise<RelationshipResult> {
-  if (!GEMINI_API_KEY) return { nodes: [], relationships: [] }
+  if (!GROQ_API_KEY) return { nodes: [], relationships: [] }
 
   try {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const groq = new Groq({ apiKey: GROQ_API_KEY, dangerouslyAllowBrowser: true })
 
     const metaStr = JSON.stringify(documentMetadata, null, 2)
-    const result = await model.generateContent(RELATIONSHIP_PROMPT + metaStr)
-    const raw = result.response.text().trim()
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: RELATIONSHIP_PROMPT + metaStr }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.1,
+      response_format: { type: 'json_object' }
+    })
+    const raw = chatCompletion.choices[0]?.message?.content || '{}'
 
     // Strip markdown fences
     const cleaned = raw.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()

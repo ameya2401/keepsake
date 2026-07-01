@@ -13,7 +13,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '@/components/ui'
 import { useAuth } from '@/providers/AuthProvider'
 import { supabase } from '@/lib/supabase'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -180,15 +180,20 @@ export default function ResumeAnalyzerPage() {
         top_skills: skills.map((s: { name: string; document_count: number }) => s.name),
       }, null, 2)
 
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-      if (!apiKey) throw new Error('Gemini API key not configured')
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY
+      if (!apiKey) throw new Error('Groq API key not configured')
 
-      const genAI = new GoogleGenerativeAI(apiKey)
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-
+      const groq = new Groq({ apiKey, dangerouslyAllowBrowser: true })
       const prompt = buildAnalysisPrompt(resumeText, memoryContext)
-      const response = await model.generateContent(prompt)
-      const raw = response.response.text().trim()
+      
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.1,
+        response_format: { type: 'json_object' }
+      })
+
+      const raw = chatCompletion.choices[0]?.message?.content || '{}'
       const cleaned = raw.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()
       const parsed = JSON.parse(cleaned) as AnalysisResult
 
