@@ -255,11 +255,20 @@ export async function seedDemoData(userId: string): Promise<{ success: boolean; 
 // Clear demo data
 // ─────────────────────────────────────────────────────────────
 
-export async function clearDemoData(userId: string): Promise<void> {
-  // Delete documents tagged as demo (cascade will remove related records)
-  await supabase
-    .from('documents')
-    .delete()
-    .eq('user_id', userId)
-    .contains('tags', ['demo'])
+export async function clearDemoData(userId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Delete documents tagged as demo (cascade will remove related records)
+    const { error } = await supabase
+      .from('documents')
+      .delete()
+      .eq('user_id', userId)
+      .contains('tags', ['demo'])
+
+    if (error) throw new Error(error.message)
+    return { success: true }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Demo clear failed'
+    console.error('[DemoSeeder]', msg)
+    return { success: false, error: msg }
+  }
 }

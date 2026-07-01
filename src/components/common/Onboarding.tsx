@@ -153,10 +153,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const handleLoadDemo = useCallback(async () => {
     if (!user?.id) return
     setIsSeeding(true)
-    await seedDemoData(user.id)
+    const { success, error } = await seedDemoData(user.id)
     setIsSeeding(false)
-    onComplete()
-    navigate('/dashboard')
+    if (success) {
+      onComplete()
+      navigate('/dashboard')
+    } else {
+      console.error("Failed to seed demo data:", error)
+    }
   }, [user?.id, onComplete, navigate])
 
   return (

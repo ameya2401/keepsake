@@ -291,9 +291,13 @@ export default function DashboardPage() {
   const handleDemoLoad = useCallback(async () => {
     if (!user?.id) return
     setIsDemoSeeding(true)
-    await seedDemoData(user.id)
+    const { success, error } = await seedDemoData(user.id)
     setIsDemoSeeding(false)
-    loadDashboard()
+    if (success) {
+      loadDashboard()
+    } else {
+      console.error("Demo load failed:", error)
+    }
   }, [user?.id, loadDashboard])
 
   useEffect(() => { loadDashboard() }, [loadDashboard])

@@ -189,6 +189,7 @@ export default function LandingPage() {
             <Link
               to="/login"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 font-medium transition-all duration-200 text-zinc-300"
+              aria-label="View demo or log in"
             >
               View demo
               <Zap className="w-4 h-4 text-amber-400" />

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/providers/AuthProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { ProtectedRoute } from '@/components/common/ProtectedRoute'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { Spinner } from '@/components/ui'
 
 // ─────────────────────────────────────────────────────────────
@@ -273,7 +274,9 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark">
         <AuthProvider>
-          <RouterProvider router={router} />
+          <ErrorBoundary>
+            <RouterProvider router={router} />
+          </ErrorBoundary>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
