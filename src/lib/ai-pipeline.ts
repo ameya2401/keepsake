@@ -353,8 +353,8 @@ export async function runAIPipeline(
   jobId: string,
   onProgress?: ProgressCallback
 ): Promise<{ success: boolean; error?: string }> {
-  const report = (step: PipelineStep, percent: number, message: string) => {
-    onProgress?.({ step, percent, message })
+  const report = (step: PipelineStep, percent: number, message: string, errorMsg?: string) => {
+    onProgress?.({ step, percent, message, error: errorMsg })
   }
 
   try {
@@ -488,7 +488,7 @@ export async function runAIPipeline(
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : 'AI processing failed'
 
-    report('failed', 0, errMsg, )
+    report('failed', 0, errMsg, errMsg)
 
     // Mark as failed in DB
     await updateDocumentStatus(documentId, 'failed')
