@@ -2,12 +2,12 @@ import { lazy, Suspense } from 'react'
 import {
   createBrowserRouter,
   RouterProvider,
-  Navigate,
 } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '@/providers/AuthProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { ProtectedRoute } from '@/components/common/ProtectedRoute'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { Spinner } from '@/components/ui'
 
 // ─────────────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ const LoginPage = lazy(() => import('@/features/authentication/LoginPage'))
 const SignupPage = lazy(() => import('@/features/authentication/SignupPage'))
 const ForgotPasswordPage = lazy(() => import('@/features/authentication/ForgotPasswordPage'))
 const AuthCallbackPage = lazy(() => import('@/features/authentication/AuthCallbackPage'))
+const LandingPage = lazy(() => import('@/pages/LandingPage'))
 
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage'))
 const UploadPage = lazy(() => import('@/features/upload/UploadPage'))
@@ -69,10 +70,14 @@ const queryClient = new QueryClient({
 // ─────────────────────────────────────────────────────────────
 
 const router = createBrowserRouter([
-  // Public routes
+  // Landing page (public)
   {
     path: '/',
-    element: <Navigate to="/login" replace />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <LandingPage />
+      </Suspense>
+    ),
   },
   {
     path: '/login',
@@ -269,7 +274,9 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark">
         <AuthProvider>
-          <RouterProvider router={router} />
+          <ErrorBoundary>
+            <RouterProvider router={router} />
+          </ErrorBoundary>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
